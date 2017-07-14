@@ -1,0 +1,9 @@
+{
+    "path" : "~/Desktop/genome.wide.plot",
+    "sortOrder" : [
+        {
+            "ascending" : true,
+            "columnIndex" : 2
+        }
+    ]
+}

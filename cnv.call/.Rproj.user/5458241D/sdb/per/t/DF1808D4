@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "\n# This is the user-interface definition of a Shiny web application.\n# You can find out more about building applications with Shiny here:\n#\n# http://shiny.rstudio.com\n#\n\nlibrary(shiny)\n\nshinyUI(pageWithSidebar(\n\n  # Application title\n  titlePanel(\"function: cnv.call\"),\n\n  # Sidebar with a slider input for number of bins\n  sidebarPanel(\n      textInput(inputId = \"sampleId\",\n                label = \"sampleId, sample ID to be displayed in the title of the plot.\",\n                value = \"PT116\"),\n      textInput(inputId = \"maxL\",\n                label = \"The maximum Length:\",\n                  value = 2000),\n      textInput(inputId = \"N\",\n                label = \"The number of replicates drawn by bootstrap:\",\n                value = 1000),\n      textInput(inputId = \"pvalue\",\n                label = \"a p-value cut-off for CNV calling\",\n                value = 0.05)\n      \n    ),\n\n    # Show a plot of the generated distribution\n    mainPanel(\n      tableOutput(\"res\")\n    )\n))\n",
+    "created" : 1499418431117.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3234310896",
+    "id" : "DF1808D4",
+    "lastKnownWriteTime" : 1499421203,
+    "last_content_update" : 1499421203054,
+    "path" : "~/Desktop/R/cnv.call/ui.R",
+    "project_path" : "ui.R",
+    "properties" : {
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

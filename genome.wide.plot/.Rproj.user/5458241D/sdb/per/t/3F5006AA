@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "library(shiny)\n\nshinyUI(pageWithSidebar(\n  headerPanel(\"genome.wide.plot:  Visualize Genome-Wide SCNA Profile\"),\n  \n  sidebarPanel(\n    textInput(inputId = \"sampleId\",\n              label = \"sampleId, sample ID to be displayed in the title of the plot.\",\n              value = \"\"),\n    textInput(inputId = \"chrs\",\n              label = \"chrs,the chromosomes to be visualized. For example, 1:22.\",\n              value = \"\")\n  ),\n  \n  mainPanel(\n    plotOutput(\"plotDisplay\")\n  )\n))",
+    "created" : 1500021581342.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "95790189",
+    "id" : "3F5006AA",
+    "lastKnownWriteTime" : 1500021605,
+    "last_content_update" : 1500021605445,
+    "path" : "~/Desktop/genome.wide.plot/ui.R",
+    "project_path" : "ui.R",
+    "properties" : {
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

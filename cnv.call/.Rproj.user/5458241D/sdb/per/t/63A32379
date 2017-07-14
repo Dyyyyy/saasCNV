@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "\n# This is the server logic for a Shiny web application.\n# You can find out more about building applications with Shiny here:\n#\n# http://shiny.rstudio.com\n#\n\nlibrary(shiny)\nlibrary(saasCNV)\n\ndata(seq.data)\ndata(seq.segs.merge)\n\nshinyServer(function(input, output) {\n  \n  output$res <- renderTable({\n    cnv.call(data=seq.data, \n             sample.id=input$sampleId,\n             segs.stat=seq.segs.merge, \n             maxL=2000, N=1000,\n             pvalue.cutoff=0.05)\n  })\n\n})\n",
+    "created" : 1499418431367.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1477097473",
+    "id" : "63A32379",
+    "lastKnownWriteTime" : 1499421193,
+    "last_content_update" : 1499421193361,
+    "path" : "~/Desktop/R/cnv.call/server.R",
+    "project_path" : "server.R",
+    "properties" : {
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
