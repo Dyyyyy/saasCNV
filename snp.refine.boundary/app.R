@@ -43,7 +43,6 @@ server <- function(input, output) {
     paste("hi",input$data)
   })
   
-  
   load("snp.data.RData")
   data(snp.cnv)
   snp.cnv.refine <- snp.refine.boundary(data=snp.data, segs.stat=snp.cnv)
