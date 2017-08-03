@@ -24,22 +24,29 @@ shinyServer(function(input, output) {
   
   output$plot <- renderPlot({})
   output$table <- renderTable({})
-  switch(1,
-          output$tbl <- DT::renderDataTable({
+  
+  observeEvent(input$tabs, {
+    tabId <- reactive({
+      input$tabs
+    })
+   
+  
+  switch(tabId(),
+         '1' = output$tbl <- DT::renderDataTable({
            cnv.call(data=seq.data, 
                     sample.id=input$sampleId,
                     segs.stat=seq.segs.merge, 
                     maxL=2000, N=1000,
                     pvalue.cutoff=0.05)}),
          
-          output$plot <- renderPlot({
+         '2' = output$plot <- renderPlot({
           diagnosis.cluster.plot(segs=seq.cnv,
                                  chrs=sub("^chr","",unique(seq.cnv$chr)),
                                  min.snps=input$min.snps,
                                  max.cex=input$max.cex,
                                  ref.num.probe=input$ref.num.probe)}),
          
-          output$plot <- renderPlot({
+         '3' = output$plot <- renderPlot({
             datasetInput <- reactive({
              switch(input$sample.id,
                     "Joint Segmentation" = seq.segs,
@@ -50,7 +57,7 @@ shinyServer(function(input, output) {
                                   chr=input$chr, cex=input$cex)
           }),
          
-         t <- function(){
+         '4' = t <- function(){
             data <- reactive({  
               dist <- switch(input$dist,
                              cnv = cnv,
@@ -78,14 +85,14 @@ shinyServer(function(input, output) {
             })
           },
          
-         output$plot <- renderPlot({
+         '5' = output$plot <- renderPlot({
            genome.wide.plot(data=seq.data, segs=seq.cnv,
                             sample.id=input$sampleId,
                             chrs=sub("^chr","",unique(seq.cnv$chr)),
                             cex=0.3)
          }),
          
-         output$tbl <- DT::renderDataTable({
+         '6' = output$tbl <- DT::renderDataTable({
            joint.segmentation(data=seq.data,
                               min.snps=input$min.snps,
                               global.pval.cutoff=input$global.pval.cutoff,
@@ -94,7 +101,7 @@ shinyServer(function(input, output) {
            
          }),
          
-         output$tbl <- DT::renderDataTable({
+         '7' = output$tbl <- DT::renderDataTable({
            merging.segments(data=seq.data, segs.stat=seq.segs,
                             use.null.data=input$use.null.data,
                             N=input$N,
@@ -102,7 +109,7 @@ shinyServer(function(input, output) {
                             merge.pvalue.cutoff=input$merge.pvalue.cutoff, verbose=input$verbose)
          }),
          
-         t <- function(){
+         '8' = t <- function(){
            gene.anno <- read.delim(file="refGene_hg19.txt.gz", as.is=TRUE, comment.char="")
            data(seq.cnv)
            output$tbl <- DT::renderDataTable({
@@ -110,22 +117,23 @@ shinyServer(function(input, output) {
            })
          },
          
-         output$tbl <- DT::renderDataTable({
+         '9' = output$tbl <- DT::renderDataTable({
            snp_table <- read.delim(file="snp_table.txt.gz", as.is=TRUE)
            head(snp.cnv.data(snp=snp_table, min.chr.probe=input$min.chr.probe, verbose=input$verbose))
          }),
          
-         output$tbl <- DT::renderDataTable({
+         '10' = output$tbl <- DT::renderDataTable({
            load("snp.data.RData")
            snp.cnv.refine <- snp.refine.boundary(data=snp.data, segs.stat=snp.cnv)
            head(snp.cnv.refine)
          }),
          
-         output$tbl <- DT::renderDataTable({
+         '11' = output$tbl <- DT::renderDataTable({
            head(vcf2txt(vcf.file=input$file, normal.col=input$normal+1, tumor.col=input$tumor+2))
          })
          
         
   )
+  })
 })
 

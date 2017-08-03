@@ -9,23 +9,23 @@ sidebar <- dashboardSidebar(
                     label = "Search..."),
   sidebarMenu(
     id = "tabs", 
-    menuItem("cnv_call", tabName = 1, icon = icon("dashboard")),
-    menuItem("diagnosis_cluster_plot", tabName = 2, icon = icon("dashboard")),
-    menuItem("diagnosis_cluster_plot_chr", tabName = 3, icon = icon("dashboard")),
-    menuItem("GC.adjust", tabName = 4, icon = icon("dashboard")),
-    menuItem("genome_wide_plot", tabName = 5, icon = icon("dashboard")),
-    menuItem("joint_segmentation", tabName = 6, icon = icon("dashboard")),
-    menuItem("merging_segmentation", tabName = 7, icon = icon("dashboard")),
-    menuItem("reannotate_CNV_res", tabName = 8, icon = icon("dashboard")),
-    menuItem("snp_cnv_data", tabName = 9, icon = icon("dashboard")),
-    menuItem("snp_refine_boundary", tabName = 10, icon = icon("dashboard")),
-    menuItem("vcf2txt", tabName = 11, icon = icon("dashboard"))
+    menuItem("cnv_call", tabName = '1', icon = icon("dashboard")),
+    menuItem("diagnosis_cluster_plot", tabName = '2', icon = icon("dashboard")),
+    menuItem("diagnosis_cluster_plot_chr", tabName = '3', icon = icon("dashboard")),
+    menuItem("GC.adjust", tabName = '4', icon = icon("dashboard")),
+    menuItem("genome_wide_plot", tabName = '5', icon = icon("dashboard")),
+    menuItem("joint_segmentation", tabName = '6', icon = icon("dashboard")),
+    menuItem("merging_segmentation", tabName = '7', icon = icon("dashboard")),
+    menuItem("reannotate_CNV_res", tabName = '8', icon = icon("dashboard")),
+    menuItem("snp_cnv_data", tabName = '9', icon = icon("dashboard")),
+    menuItem("snp_refine_boundary", tabName = '10', icon = icon("dashboard")),
+    menuItem("vcf2txt", tabName = '11', icon = icon("dashboard"))
   )
 )
 
 body <- dashboardBody(
   tabItems(
-    tabItem(tabName = 1,
+    tabItem(tabName = '1',
             box(
               title = "Arguments", status = "warning", solidHeader = TRUE,
               "Usage:", br(), "",
@@ -43,7 +43,7 @@ body <- dashboardBody(
                            0, 0.10, 0.05)
             )
     ),
-    tabItem(tabName = 2,
+    tabItem(tabName = '2',
             box(
               title = "Arguments", status = "warning", solidHeader = TRUE,
               "Usage:", br(), "diagnosis.cluster.plot(segs, chrs, min.snps, max.cex = 3, ref.num.probe = NULL)",
