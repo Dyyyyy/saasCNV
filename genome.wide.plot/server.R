@@ -1,6 +1,6 @@
 library(shiny)
 library(saasCNV)
-library(ggplot2)
+# library(ggplot2)
 
 data(seq.data)
 data(seq.cnv)

@@ -22,9 +22,12 @@ ui <- fluidPage(
   
   # Sidebar with a slider input for number of bins
   sidebarPanel(
-    textInput(inputId = "only.CNV",
-              label = "only.CNV:",
-              value = TRUE)
+    
+    checkboxInput(
+      inputId = "only.CNV",
+      label = "annotate and output only segment assigned to gain/loss/LOH",
+      value = TRUE
+    )
     
   ),
   

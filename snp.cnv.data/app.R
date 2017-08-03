@@ -12,8 +12,6 @@
 library(shiny)
 library(saasCNV)
 
-data(seq.data)
-
 # Define UI for application that draws a histogram
 ui <- fluidPage(
    
@@ -22,11 +20,13 @@ ui <- fluidPage(
   
   # Sidebar with a slider input for number of bins
   sidebarPanel(
+    
     numericInput(inputId = "min.chr.probe",
-              label = "min.chr.probe:",
+              label = "the minimum number of probes tagging a chromosome for it to be passed to the subsequent analysis",
               value = 100),
-    textInput(inputId = "verbose",
-              label = "verbose:",
+    
+    checkboxInput(inputId = "verbose",
+              label = "output more details",
               value = TRUE)
     
   ),

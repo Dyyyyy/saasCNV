@@ -17,8 +17,9 @@ shinyServer(function(input, output) {
     cnv.call(data=seq.data, 
              sample.id=input$sampleId,
              segs.stat=seq.segs.merge, 
-             maxL=2000, N=1000,
-             pvalue.cutoff=0.05)
+             maxL=input$maxL,
+             N=input$N,
+             pvalue.cutoff=input$pvalue)
   })
 
 })
