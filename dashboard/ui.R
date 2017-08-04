@@ -9,9 +9,10 @@ sidebar <- dashboardSidebar(
                     label = "Search..."),
   sidebarMenu(
     id = "tabs", 
+    menuItem("diagnosis_cluster_plot", tabName = 'diagnosis_cluster_plot_f', icon = icon("dashboard")),
     menuItem("cnv_call", tabName = 'cnv_call_f', icon = icon("dashboard")),
     menuItem("cnv_data", tabName = 'cnv_data_f', icon = icon("dashboard")),
-    menuItem("diagnosis_cluster_plot", tabName = 'diagnosis_cluster_plot_f', icon = icon("dashboard")),
+    
     menuItem("diagnosis_cluster_plot_chr", tabName = 'diagnosis_seg_plot_chr_f', icon = icon("dashboard")),
     menuItem("GC_adjust", tabName = 'GC_adjust_f', icon = icon("dashboard")),
     menuItem("genome_wide_plot", tabName = 'genome_wide_plot_f', icon = icon("dashboard")),
@@ -30,7 +31,8 @@ body <- dashboardBody(
   tabItems(
     tabItem(tabName = 'cnv_call_f',
             box(
-              title = "Arguments", status = "warning", solidHeader = TRUE,
+              width = 10,
+              title = "Arguments", status = "info", solidHeader = TRUE,
               "Description:", br(), "Assign SCNA state to each segment directly from joint segmentation or from the results after seg- ments merging step.",
               textInput("sampleId",
                         "sampleId, sample ID to be displayed in the title of the plot.",
@@ -48,7 +50,8 @@ body <- dashboardBody(
     ),
     tabItem(tabName = 'cnv_data_f',
             box(
-              title = "Arguments", status = "warning", solidHeader = TRUE,
+              width = 10,
+              title = "Arguments", status = "info", solidHeader = TRUE,
               "Description:", br(), "Transform read depth information into log2ratio and log2mBAF that we use for joint segmentation and CNV calling.",
               fileInput(
                 "vcf", 
@@ -71,7 +74,8 @@ body <- dashboardBody(
     ),
     tabItem(tabName = 'diagnosis_cluster_plot_f',
             box(
-              title = "Arguments", status = "warning", solidHeader = TRUE,
+              width = 10,
+              title = "Arguments", status = "info", solidHeader = TRUE,
               "Description:", br(), "diagnosis.cluster.plot(segs, chrs, min.snps, max.cex = 3, ref.num.probe = NULL)",
               sliderInput("min.snps",
                           "min.snps",
@@ -86,7 +90,8 @@ body <- dashboardBody(
     ),
     tabItem(tabName = 'diagnosis_seg_plot_chr_f',
             box(
-              title = "Arguments", status = "warning", solidHeader = TRUE,
+              width = 10,
+              title = "Arguments", status = "info", solidHeader = TRUE,
               "Description:", br(), "diagnosis.seg.plot.chr(data, segs, sample.id = 'Sample', chr = 1, cex = 0.3)",
               selectInput("sample.id", "Choose a data frame:", 
                           choices = c("Joint Segmentation", "After Segments Merging Step")),
@@ -100,7 +105,8 @@ body <- dashboardBody(
     ),
     tabItem(tabName = 'GC_adjust_f',
             box(
-              title = "Arguments", status = "warning", solidHeader = TRUE,
+              width = 10,
+              title = "Arguments", status = "info", solidHeader = TRUE,
               "Description:", br(), "GC.adjust(data, gc, maxNumDataPoints = 10000)",
               radioButtons("data", "data: ",
                            list("cnv.data" = "cnv",
@@ -118,7 +124,8 @@ body <- dashboardBody(
     ),
     tabItem(tabName = 'genome_wide_plot_f',
             box(
-              title = "Arguments", status = "warning", solidHeader = TRUE,
+              width = 10,
+              title = "Arguments", status = "info", solidHeader = TRUE,
               "Description:", br(), 
               "On the top panel, the log2ratio signal is plotted against chromosomal position and on the panels blow, the log2mBAF, tumor mBAF, and normal mBAF signals. The dots, each representing a probe data point, are colored alternately to distinguish chromosomes. The segments, each representing a DNA segment resulting from the joint segmentation, are colored based on inferred copy number status.",
               textInput("sampleId_for_genome_wide_plot",
@@ -129,12 +136,13 @@ body <- dashboardBody(
                         ""),
               sliderInput("cex_for_genome_wide_plot",
                           "a numerical value giving the amount by ...",
-                          0.1, 0.6, 0.3)
+                          0.1, 20, 0.3)
             )
     ),
     tabItem(tabName = 'joint_segmentation_f',
             box(
-              title = "Arguments", status = "warning", solidHeader = TRUE,
+              width = 10,
+              title = "Arguments", status = "info", solidHeader = TRUE,
               "Description:", br(), 
               "We employ the algorithm developed by (Zhang et al., 2010) to perform joint segmentation on log2ratio and log2mBAF dimensions. The function outputs the starting and ending points of each CNV segment as well as some summary statistics.",
               sliderInput("min.snps",
@@ -155,7 +163,8 @@ body <- dashboardBody(
     ),
     tabItem(tabName = 'merging_segments_f',
             box(
-              title = "Arguments", status = "warning", solidHeader = TRUE,
+              width = 10,
+              title = "Arguments", status = "info", solidHeader = TRUE,
               "Description:", br(), "Merge Adjacent Segments",
               checkboxInput("use_null_data_for_merging_segments", 
                             "use.null.data: ",
@@ -179,8 +188,15 @@ body <- dashboardBody(
     ),
     tabItem(tabName = 'NGS_CNV_f',
             box(
-              title = "Arguments", status = "warning", solidHeader = TRUE,
+              width = 10,
+              title = "Arguments", status = "info", solidHeader = TRUE,
               "Description:", br(), "reannotate.CNV.res(res, gene, only.CNV = FALSE)",
+              fileInput(
+                "vcf_ngs", 
+                "a tab-delimited file containing gene annotation information.",
+                multiple = FALSE, accept = NULL, width = NULL,
+                buttonLabel = "Browse...", 
+                placeholder = "No file selected"),
               textInput("output.dir_for_ngs_cnv",
                         "the directory to save all the results",
                         "test_saasCNV"
@@ -253,10 +269,12 @@ body <- dashboardBody(
                             "perform gene annotation step",
                             FALSE
               ),
-              textInput("gene.anno.file_for_ngs_cnv",
-                        "a tab-delimited file containing gene annotation information",
-                        "refGene_hg19.txt.gz"
-              ),
+              fileInput(
+                "ngs", 
+                "a tab-delimited file containing gene annotation information.",
+                multiple = FALSE, accept = NULL, width = NULL,
+                buttonLabel = "Browse...", 
+                placeholder = "No file selected"),
               sliderInput("seed_for_ngs_cnv",
                           "random seed can be set for reproducibility of results, could only be integer",
                           10000, 200000000, 123456789
@@ -269,7 +287,8 @@ body <- dashboardBody(
     ),
     tabItem(tabName = 'reannotate_CNV_res_f',
             box(
-              title = "Arguments", status = "warning", solidHeader = TRUE,
+              width = 10,
+              title = "Arguments", status = "info", solidHeader = TRUE,
               "Description:", br(), "reannotate.CNV.res(res, gene, only.CNV = FALSE)",
               fileInput(
                 "refGene", 
@@ -284,7 +303,8 @@ body <- dashboardBody(
     ),
     tabItem(tabName = 'snp_cnv_f',
             box(
-              title = "Arguments", status = "warning", solidHeader = TRUE,
+              width = 10,
+              title = "Arguments", status = "info", solidHeader = TRUE,
               "Description:", br(), "snp.cnv.data(snp, min.chr.probe = 100, verbose = FALSE)",
               textInput("output.dir_for_snp_cnv",
                         "the directory to save all the results",
@@ -378,10 +398,11 @@ body <- dashboardBody(
     ),
     tabItem(tabName = 'snp_cnv_data_f',
             box(
-              title = "Arguments", status = "warning", solidHeader = TRUE,
+              width = 10,
+              title = "Arguments", status = "info", solidHeader = TRUE,
               "Description:", br(), "snp.cnv.data(snp, min.chr.probe = 100, verbose = FALSE)",
               fileInput(
-                "refGene", 
+                "snp", 
                 "A data frame containing three columns: chr, position and GC.",
                 multiple = FALSE, accept = NULL, width = NULL,
                 buttonLabel = "Browse...", 
@@ -399,11 +420,15 @@ body <- dashboardBody(
     ),
     tabItem(tabName = 'snp_refine_boundary_f',
             box(
-              title = "Arguments", status = "warning", solidHeader = TRUE,
+              width = 10,
+              title = "Arguments", status = "info", solidHeader = TRUE,
               "Description:", br(), "snp.refine.boundary(data, segs.stat)",
-              textInput("data",
-                        "a data frame containing log2ratio and log2mBAF data generated by snp.cnv.data.",
-                        "snp.data.RData"),
+              fileInput(
+                "data", 
+                "data",
+                multiple = FALSE, accept = NULL, width = NULL,
+                buttonLabel = "Browse...", 
+                placeholder = "No file selected"),
               textInput("segs.stat",
                         "a data frame containing segment locations and summary statistics resulting from cnv.call.",
                         "cnv.call")
@@ -411,11 +436,15 @@ body <- dashboardBody(
     ),
     tabItem(tabName = 'vcf2txt_f',
             box(
-              title = "Arguments", status = "warning", solidHeader = TRUE,
+              width = 10,
+              title = "Arguments", status = "info", solidHeader = TRUE,
               "Description:", br(), "vcf2txt(vcf.file, normal.col = 10, tumor.col = 11, MQ.cutoff = 30)",
-              textInput("file",
-                        "vcf file name",
-                        "WES_example.vcf.gz"),
+              fileInput(
+                "vcf2", 
+                "vcf2",
+                multiple = FALSE, accept = NULL, width = NULL,
+                buttonLabel = "Browse...", 
+                placeholder = "No file selected"),
               sliderInput("normal_for_vcf2txt",
                           "the number of the column in which the genotype and read depth information of normal tissue are located in the vcf file.",
                            1, 20, 9),
@@ -429,15 +458,11 @@ body <- dashboardBody(
     )
     
   ),
-  box(
-    title = "Diagram", status = "primary", solidHeader = TRUE,
-    collapsible = TRUE,
-    plotOutput("plot", height = 680)
-  ),
 
-  DT::dataTableOutput('tbl')
+  plotOutput("plot"),
+  DT::dataTableOutput('tbl', height = 2000)
   
 )
 
-dashboardPage(header, sidebar, body)
+dashboardPage(header, sidebar, body, skin = "purple")
   

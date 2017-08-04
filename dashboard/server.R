@@ -9,6 +9,7 @@ library(shiny)
 library(shinydashboard)
 library(saasCNV)
 library(DT)
+options(shiny.maxRequestSize=50*1024^2) 
 
 data(seq.data)
 data(seq.cnv)
@@ -18,13 +19,13 @@ data(snp.cnv)
 data(snp.cnv.refine)
 
 shinyServer(function(input, output) {
-  output$plot <- renderPlot(NULL)
-  output$table <- renderTable(NULL)
-  
+
   observeEvent(input$tabs, {
     tabId <- reactive({
       input$tabs
     })
+    output$plot <- renderPlot({}, width = "0")
+    output$tbl <- DT::renderDataTable({})
     
     switch(tabId(),
            'cnv_call_f' = cnv_call_f(),
@@ -55,14 +56,18 @@ shinyServer(function(input, output) {
   }
   
   cnv_data_f <- function(){
+    output$tbl <- DT::renderDataTable({
     vcf_file <- input$vcf
-    vcf_table <- read.delim(file=vcf_file, as.is=TRUE)
+    if (is.null(vcf_file))
+      return(NULL)
+    vcf_table <- read.delim(vcf_file$datapath, as.is=TRUE)
+    print(vcf_file$datapath)
     cnv.data(vcf = vcf_table,
              min.chr.probe = input$min.chr.probe,
              verbose = input$verbose)
-    output$tbl <- DT::renderDataTable({
+    
       data(seq.data)
-      # head(seq.data)
+      head(seq.data)
     })
   }
   
@@ -89,6 +94,7 @@ shinyServer(function(input, output) {
   }
   
   GC_adjust_f <- function(){
+    output$tbl <- DT::renderDataTable({
     data <- reactive({
       dist <- switch(input$dist,
                       cnv = cnv,
@@ -98,12 +104,14 @@ shinyServer(function(input, output) {
       dist(input$n)
     })
         
-    gc <- input$gc
-    gc <- read.delim(file=gc_file, as.is=TRUE)
+    gc_file <- input$gc
+    if (is.null(gc_file))
+      return(NULL)
+    gc <- read.delim(file=gc_file$datapath, as.is=TRUE)
     head(gc)
     seq.data <- GC.adjust(data = seq.data, gc = gc, maxNumDataPoints = input$maxNumDataPoints)
 
-    output$tbl <- DT::renderDataTable({
+    
       head(seq.data)
     })
   }
@@ -145,6 +153,13 @@ shinyServer(function(input, output) {
   
   NGS_CNV_f <- function(){
     output$tbl <- DT::renderDataTable({
+      ngs_file <- input$ngs
+      if (is.null(ngs_file))
+        return(NULL)
+      vcf_ngs_file <- input$vcf_ngs
+      if (is.null(vcf_ngs_file))
+        return(NULL)
+      vcf_table <- read.delim(vcf_ngs_file$datapath, as.is=TRUE)
       NGS.CNV(
         vcf = vcf_table,
         output.dir = file.path(getwd(), input$output.dir_for_ngs_cnv),
@@ -164,17 +179,20 @@ shinyServer(function(input, output) {
         cex = input$cex_for_ngs_cnv,
         ref.num.probe = input$ref.num.probe_for_ngs_cnv,
         do.gene.anno = input$do.gene.anno_for_ngs_cnv,
-        gene.anno.file = file.path(getwd(), input$gene.anno.file_for_ngs_cnv),
+        gene.anno.file = ngs_file$datapath,
         seed = input$seed_for_ngs_cnv,
         verbose = input$verbose_for_ngs_cnv)
     }) 
   }
   
   reannotate_CNV_res_f <- function(){
+    output$tbl <- DT::renderDataTable({
     file <- input$refGene
+    if (is.null(file))
+      return(NULL)
     gene.anno <- read.delim(file=file$datapath, as.is=TRUE, comment.char="")
     data(seq.cnv)
-    output$tbl <- DT::renderDataTable({
+    
       reannotate.CNV.res(res=seq.cnv, gene=gene.anno, only.CNV=input$only.CNV)
     })
   }
@@ -208,22 +226,32 @@ shinyServer(function(input, output) {
   
   snp_cnv_data_f <- function(){
     output$tbl <- DT::renderDataTable({
-      snp_table <- read.delim(file="snp_table.txt.gz", as.is=TRUE)
+      snp_file <- input$snp
+      if (is.null(snp_file))
+        return(NULL)
+      snp_table <- read.delim(file=snp_file$datapath, as.is=TRUE)
       head(snp.cnv.data(snp=snp_table, min.chr.probe=input$min.chr.probe_for_snp_cnv_data, verbose=input$verbose_for_snp_cnv_data))
     })
   }
   
   snp_refine_boundary_f <- function(){
-    load("snp.data.RData")
-    snp.cnv.refine <- snp.refine.boundary(data=snp.data, segs.stat=snp.cnv)
     output$tbl <- DT::renderDataTable({
+      data_file <- input$data
+      if (is.null(data_file))
+        return(NULL)
+    load(data_file$datapath)
+    snp.cnv.refine <- snp.refine.boundary(data=snp.data, segs.stat=snp.cnv)
       head(snp.cnv.refine)
     })
   }
   
   vcf2txt_f <- function(){
     output$tbl <- DT::renderDataTable({
-      head(vcf2txt(vcf.file=input$file, normal.col=input$normal_for_vcf2txt+1, tumor.col=input_for_vcf2txt$tumor+2))
+      vcf2_file <- input$vcf2
+      if (is.null(vcf2_file))
+        return(NULL)
+      vcf2_table <- read.delim(file=vcf2_file$datapath, as.is=TRUE)
+      head(vcf2txt(vcf.file=vcf2_file$datapath, normal.col=input$normal_for_vcf2txt+1, tumor.col=input$tumor_for_vcf2txt+2))
     })
   }
   
