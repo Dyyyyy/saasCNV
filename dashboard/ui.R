@@ -306,6 +306,12 @@ body <- dashboardBody(
               width = 10,
               title = "Arguments", status = "info", solidHeader = TRUE,
               "Description:", br(), "snp.cnv.data(snp, min.chr.probe = 100, verbose = FALSE)",
+              fileInput(
+                "snp.cnv", 
+                "A data frame containing three columns: chr, position and GC.",
+                multiple = FALSE, accept = NULL, width = NULL,
+                buttonLabel = "Browse...", 
+                placeholder = "No file selected"),
               textInput("output.dir_for_snp_cnv",
                         "the directory to save all the results",
                         "test_saasCNV"
@@ -382,10 +388,12 @@ body <- dashboardBody(
                             "perform gene annotation step",
                             FALSE
               ),
-              textInput("gene.anno.file_for_snp_cnv",
-                        "a tab-delimited file containing gene annotation information",
-                        "refGene_hg19.txt.gz"
-              ),
+              fileInput(
+                "gene.anno", 
+                "A data frame containing three columns: chr, position and GC.",
+                multiple = FALSE, accept = NULL, width = NULL,
+                buttonLabel = "Browse...", 
+                placeholder = "No file selected"),
               sliderInput("seed_for_snp_cnv",
                           "random seed can be set for reproducibility of results, could only be integer",
                           100000000, 999999999, 123456789
@@ -441,7 +449,7 @@ body <- dashboardBody(
               "Description:", br(), "vcf2txt(vcf.file, normal.col = 10, tumor.col = 11, MQ.cutoff = 30)",
               fileInput(
                 "vcf2", 
-                "vcf2",
+                "wes",
                 multiple = FALSE, accept = NULL, width = NULL,
                 buttonLabel = "Browse...", 
                 placeholder = "No file selected"),

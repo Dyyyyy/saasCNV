@@ -199,7 +199,14 @@ shinyServer(function(input, output) {
   
   snp_cnv_f <- function(){
     output$tbl <- DT::renderDataTable({
-      SNP.CNV(snp=snp_table,
+      file <- input$snp.cnv
+      if (is.null(file))
+        return(NULL)
+      snp_cnv_table <- read.delim(file$datapath, as.is=TRUE)
+      gene.anno.file <- input$gene.anno
+      if (is.null(gene.anno.file))
+        return(NULL)
+      SNP.CNV(snp=snp_cnv_table,
               output.dir=file.path(getwd(), input$output.dir_for_snp_cnv),
               sample.id=input$sample.id_for_snp_cnv,
               min.chr.probe=input$min.chr.probe_for_snp_cnv,
@@ -218,7 +225,7 @@ shinyServer(function(input, output) {
               cex=input$ces_for_snp_cnv,
               ref.num.probe=input$ref.num.probe_for_snp_cnv,
               do.gene.anno=input$do.gene.anno_for_snp_cnv,
-              gene.anno.file=file.path(getwd(), input$gene.anno.file_for_snp_cnv),
+              gene.anno.file=gene.anno.file$datapath,
               seed=input$seed_for_snp_cnv,
               verbose=input$verbose_for_snp_cnv)
     })
