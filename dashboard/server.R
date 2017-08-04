@@ -153,6 +153,7 @@ shinyServer(function(input, output) {
   
   NGS_CNV_f <- function(){
     output$tbl <- DT::renderDataTable({
+      timeDir = as.character(as.numeric(Sys.time())*100000, digits=15)
       ngs_file <- input$ngs
       if (is.null(ngs_file))
         return(NULL)
@@ -162,7 +163,7 @@ shinyServer(function(input, output) {
       vcf_table <- read.delim(vcf_ngs_file$datapath, as.is=TRUE)
       NGS.CNV(
         vcf = vcf_table,
-        output.dir = file.path(getwd(), input$output.dir_for_ngs_cnv),
+        output.dir = file.path(getwd(), timeDir),
         sample.id = input$sample.id_for_ngs_cnv,
         min.chr.probe = input$min.chr.probe_for_ngs_cnv,
         min.snps = input$min.snps_for_ngs_cnv,
@@ -182,7 +183,24 @@ shinyServer(function(input, output) {
         gene.anno.file = ngs_file$datapath,
         seed = input$seed_for_ngs_cnv,
         verbose = input$verbose_for_ngs_cnv)
-    }) 
+      
+      files2zip <- dir(timeDir, full.names = TRUE)
+      zip(zipfile = timeDir, files = files2zip)
+      unlink(timeDir, recursive = TRUE)
+      
+      output$downloadData_for_ngs <- downloadHandler(
+        filename <- function() {
+          paste("ngs_cnv", "zip", sep=".")
+        },
+        
+        content <- function(file) {
+          file.copy(paste(timeDir, "zip", sep="."), file)
+        },
+        contentType = "application/zip"
+      )
+      
+      head({})
+    })
   }
   
   reannotate_CNV_res_f <- function(){
@@ -199,6 +217,7 @@ shinyServer(function(input, output) {
   
   snp_cnv_f <- function(){
     output$tbl <- DT::renderDataTable({
+      timeDir = as.character(as.numeric(Sys.time())*100000, digits=15)
       file <- input$snp.cnv
       if (is.null(file))
         return(NULL)
@@ -207,7 +226,7 @@ shinyServer(function(input, output) {
       if (is.null(gene.anno.file))
         return(NULL)
       SNP.CNV(snp=snp_cnv_table,
-              output.dir=file.path(getwd(), input$output.dir_for_snp_cnv),
+              output.dir=file.path(getwd(), timeDir),
               sample.id=input$sample.id_for_snp_cnv,
               min.chr.probe=input$min.chr.probe_for_snp_cnv,
               min.snps=input$min.snps_for_snp_cnv,
@@ -228,6 +247,22 @@ shinyServer(function(input, output) {
               gene.anno.file=gene.anno.file$datapath,
               seed=input$seed_for_snp_cnv,
               verbose=input$verbose_for_snp_cnv)
+      files2zip <- dir(timeDir, full.names = TRUE)
+      zip(zipfile = timeDir, files = files2zip)
+      unlink(timeDir, recursive = TRUE)
+      
+      output$downloadData_for_snp <- downloadHandler(
+        filename <- function() {
+          paste("snp_cnv", "zip", sep=".")
+        },
+        
+        content <- function(file) {
+          file.copy(paste(timeDir, "zip", sep="."), file)
+        },
+        contentType = "application/zip"
+      )
+      
+      head({})
     })
   }
   
