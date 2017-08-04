@@ -38,13 +38,13 @@ body <- dashboardBody(
                         "sampleId, sample ID to be displayed in the title of the plot.",
                         "PT116"),
               sliderInput("maxL",
-                          "The maximum Length:",
+                          "maxL, The maximum Length:",
                           1800, 2500, 2000),
               sliderInput(inputId = "N",
-                          "The number of replicates drawn by bootstrap:",
+                          "N, The number of replicates drawn by bootstrap:",
                           500, 2000, 1000),
               sliderInput("pvalue",
-                          "a p-value cut-off for CNV calling",
+                          "pvalue, a p-value cut-off for CNV calling",
                            0, 0.10, 0.05)
             )
     ),
@@ -55,19 +55,19 @@ body <- dashboardBody(
               "Description:", br(), "Transform read depth information into log2ratio and log2mBAF that we use for joint segmentation and CNV calling.",
               fileInput(
                 "vcf", 
-                "vcf",
+                "vcf, a data frame constructed from a vcf file",
                 multiple = FALSE, accept = NULL, width = NULL,
                 buttonLabel = "Browse...", 
                 placeholder = "No file selected"),
               sliderInput(
                 "min.chr.probe",
-                "the minimum number of probes tagging a chromosome for it to be passed to the
+                "min.chr.probe, the minimum number of probes tagging a chromosome for it to be passed to the
                  subsequent analysis",
                 50, 200, 100
               ),
               checkboxInput(
                 "verbose",
-                "logical. If more details to be output.",
+                "verbose, logical. If more details to be output.",
                 FALSE
               )
             )
@@ -78,13 +78,15 @@ body <- dashboardBody(
               title = "Arguments", status = "info", solidHeader = TRUE,
               "Description:", br(), "diagnosis.cluster.plot(segs, chrs, min.snps, max.cex = 3, ref.num.probe = NULL)",
               sliderInput("min.snps",
-                          "min.snps",
+                          "min.snps, the minimum number of probes a segment span",
                           1, 100, 10),
               sliderInput("max.cex",
-                          "max.cex",
+                          "max.cex, the maximum of cex a circle is associated with",
                           1, 100, 3),
               sliderInput("ref.num.probe",
-                          "ref.num.probe",
+                          "ref.num.probe, The reference number of probes against which a segment is compared
+in order to determine the cex of the segment to be displayed. Default is NULL. If
+NULL, It will be automatically specified as 1/100 of the number of data points.",
                           800, 2000, 1000)
             )
     ),
@@ -96,10 +98,12 @@ body <- dashboardBody(
               selectInput("sample.id", "Choose a data frame:", 
                           choices = c("Joint Segmentation", "After Segments Merging Step")),
               sliderInput("chr",
-                          "chr",
+                          "chr, the chromosome number (e.g. 1) to be visualized",
                           0, 2.0, 1.0),
               sliderInput("cex",
-                          "cex",
+                          "cex, a numerical value giving the amount by which plotting text and symbols should
+be magnified relative to the default. It can be adjusted in order to make the plot
+                          legible.",
                           0, 1, 0.3)
             )
     ),
@@ -113,7 +117,7 @@ body <- dashboardBody(
                                 "snp.cnv.data" = "snp")),
               fileInput(
                 "gc", 
-                "A data frame containing three columns: chr, position and GC.",
+                "gc, A data frame containing three columns: chr, position and GC.",
                 multiple = FALSE, accept = NULL, width = NULL,
                 buttonLabel = "Browse...", 
                 placeholder = "No file selected"),
@@ -135,7 +139,7 @@ body <- dashboardBody(
                         "chrs,the chromosomes to be visualized. For example, 1:22.",
                         ""),
               sliderInput("cex_for_genome_wide_plot",
-                          "a numerical value giving the amount by ...",
+                          "cex, a numerical value giving the amount by ...",
                           0.1, 20, 0.3)
             )
     ),
@@ -146,17 +150,18 @@ body <- dashboardBody(
               "Description:", br(), 
               "We employ the algorithm developed by (Zhang et al., 2010) to perform joint segmentation on log2ratio and log2mBAF dimensions. The function outputs the starting and ending points of each CNV segment as well as some summary statistics.",
               sliderInput("min.snps",
-                          "min.snps:",
+                          "min.snps, the minimum number of probes a segment needs to span",
                           0, 20, 10),
               sliderInput("global.pval.cutoff",
-                          "global.pval.cutoff:",
+                          "global.pval.cutoff, the p-value cut-off a (or a pair) of change points to be determined as significant
+in each cycle of joint segmentation",
                           0, 1e-3, 1e-4),
               sliderInput("max.chpts",
-                          "max.chpts:",
+                          "max.chpts, the maximum number of change points to be detected for each chromosome",
                           10, 50, 30),
               checkboxInput(
                 "verbose_for_join_segementation",
-                "logical. If more details to be output.",
+                "verbose, logical. If more details to be output.",
                 TRUE
               )
             )
@@ -167,22 +172,22 @@ body <- dashboardBody(
               title = "Arguments", status = "info", solidHeader = TRUE,
               "Description:", br(), "Merge Adjacent Segments",
               checkboxInput("use_null_data_for_merging_segments", 
-                            "use.null.data: ",
+                            "use.null.data, logical: ",
                             TRUE),
               sliderInput("N_for_merging_segments",
-                           "N:",
+                           "N, the number of replicates drawn by bootstrap:",
                            500, 2000, 1000),
               sliderInput("maxL_for_mering_segments",
-                           "maxL:",
+                           "maxL, integer:",
                            1000, 4000, 2000),
               sliderInput("merge_pvalue_cutoff_for_mering_segments",
-                          "merge.pvalue.cutoff:",
+                          "merge.pvalue.cutoff, a p-value cut-off for merging:",
                            0, 0.1, 0.05),
               checkboxInput("baseline_for_merging_segments",
-                            "do.manual.baseline",
+                            "do.manual.baseline, logical:",
                             FALSE),
               checkboxInput("verbose_for_mering_segments", 
-                            "verbose: ",
+                            "verbose, logical:",
                             TRUE)
             )
     ),
@@ -190,109 +195,107 @@ body <- dashboardBody(
             box(
               width = 10,
               title = "Arguments", status = "info", solidHeader = TRUE,
-              "Description:", br(), "reannotate.CNV.res(res, gene, only.CNV = FALSE)",
+              "Description:", br(), "All analysis steps are integrate into a pipeline. The results, including visualization plots are placed
+in a directory as specified by user.",
               fileInput(
                 "vcf_ngs", 
-                "a tab-delimited file containing gene annotation information.",
+                "vcf_ngs, the location of tab-delimit file with GC content (averaged per 1kb window) information",
                 multiple = FALSE, accept = NULL, width = NULL,
                 buttonLabel = "Browse...", 
                 placeholder = "No file selected"),
-              textInput("output.dir_for_ngs_cnv",
-                        "the directory to save all the results",
-                        "test_saasCNV"
-              ),
               textInput("sample.id_for_ngs_cnv",
-                        "sample ID to be displayed in the data frame of the results and the title of some diagnosis plots",
+                        "sample.id, sample ID to be displayed in the data frame of the results and the title of some diagnosis plots",
                         "WES_0116"
               ),
               checkboxInput("do.GC.adjust_for_ngs_cnv_f",
-                            "carry out GC content adjustment on log2ratio",
+                            "do.GC.adjust, carry out GC content adjustment on log2ratio",
                             FALSE
               ),
               sliderInput("min.chr.probe_for_ngs_cnv",
-                          "the minimum number of probes tagging a chromosome for it to be passed to the subsequent analysis",
+                          "min.chr.probe, the minimum number of probes tagging a chromosome for it to be passed to the subsequent analysis",
                           1, 200, 100
               ),
               sliderInput("min.snps_for_ngs_cnv",
-                          "the minimum number of probes a segment needs to span",
+                          "min.snps, the minimum number of probes a segment needs to span",
                           1, 20, 10
               ),
               sliderInput("joint.segmentation.pvalue.cutoff_for_ngs_cnv",
-                          "the p-value cut-off one (or a pair) of change points to be determined as signifi- cant in each cycle of joint segmentation",
+                          "joint.segmentation.pvalue.cutoff, the p-value cut-off one (or a pair) of change points to be determined as signifi- cant in each cycle of joint segmentation",
                           0, 1e-3, 1e-04
               ),
               sliderInput("max.chpts_for_ngs_cnv",
-                          "the maximum number of change points to be detected for each chromosome",
+                          "max.chpts, the maximum number of change points to be detected for each chromosome",
                           1, 50, 30
               ),
               checkboxInput("do.merge_for_ngs_cnv",
-                            "carry out segments merging step",
+                            "do.merge, carry out segments merging step",
                             TRUE
               ),
               checkboxInput("use.null.data_for_ngs_cnv",
-                            "use only data for probes located in normal copy segments for bootstrapping",
+                            "use.null.data, use only data for probes located in normal copy segments for bootstrapping",
                             TRUE
               ),
               sliderInput("num.perm_for_ngs_cnv",
-                          "the number of replicates drawn by bootstrap",
+                          "num.perm, the number of replicates drawn by bootstrap",
                           500, 2000, 1000
               ),
               sliderInput("maxL_for_ngs_cnv",
-                           "the maximum length in terms of number of probes a bootstrapped segment may span, could only be integer or NULL",
+                           "maxL, the maximum length in terms of number of probes a bootstrapped segment may span, could only be integer or NULL",
                            1000, 3000, 2000
               ),
               sliderInput("merge.pvalue.cutoff_for_ngs_cnv",
-                          "a p-value cut-off for merging",
+                          "merge.pvalue.cutoff, a p-value cut-off for merging",
                           0, 0.1, 0.05
               ),
               checkboxInput("do.cnvcall.on.merge_for_ngs_cnv",
-                            "call CNV to be done after merging step",
+                            "do.cnvcall.on.merge, call CNV to be done after merging step",
                             TRUE
               ),
               sliderInput("cnvcall.pvalue.cutoff_for_ngs_cnv",
-                          "a p-value cut-off for CNV calling",
+                          "cnvcall.pvalue.cutoff, a p-value cut-off for CNV calling",
                           0, 0.1, 0.05
               ),
               checkboxInput("do.plot_for_ngs_cnv",
-                            "output diagnosis plots",
+                            "do.plot, output diagnosis plots",
                             TRUE
               ),
               sliderInput("cex_for_ngs_cnv",
-                          "plotting text and symbols magnified ratio",
-                          0, 0.2, 0.1
+                          "cex, plotting text and symbols magnified ratio",
+                          0, 0.6, 0.3
               ),
               sliderInput("ref.num.probe_for_ngs_cnv",
-                          "the reference number of probes against which a segment is compared in order to determine the cex of the segment to be displayed",
+                          "ref.num.probe, the reference number of probes against which a segment is compared in order to determine the cex of the segment to be displayed",
                           10, 2000, 1000
               ),
               checkboxInput("do.gene.anno_for_ngs_cnv",
-                            "perform gene annotation step",
+                            "do.gene.anno, perform gene annotation step",
                             FALSE
               ),
               fileInput(
                 "ngs", 
-                "a tab-delimited file containing gene annotation information.",
+                "ngs, a tab-delimited file containing gene annotation information.",
                 multiple = FALSE, accept = NULL, width = NULL,
                 buttonLabel = "Browse...", 
                 placeholder = "No file selected"),
               sliderInput("seed_for_ngs_cnv",
-                          "random seed can be set for reproducibility of results, could only be integer",
+                          "seed, random seed can be set for reproducibility of results, could only be integer",
                           10000, 200000000, 123456789
               ),
               checkboxInput("verbose_for_ngs_cnv",
-                            "output more information",
+                            "verbose, output more information",
                             TRUE
-              )
+              ),
+              downloadButton("downloadData_for_ngs", label = "Download")
             )
     ),
     tabItem(tabName = 'reannotate_CNV_res_f',
             box(
               width = 10,
               title = "Arguments", status = "info", solidHeader = TRUE,
-              "Description:", br(), "reannotate.CNV.res(res, gene, only.CNV = FALSE)",
+              "Description:", br(), "An optional function to add gene annotation to each CNV segment.",
               fileInput(
-                "refGene", 
-                "A data frame containing three columns: chr, position and GC.",
+                "res", 
+                "res, A data frame containing three columns: chr, position and GC.",
                 multiple = FALSE, accept = NULL, width = NULL,
                 buttonLabel = "Browse...", 
                 placeholder = "No file selected"),
@@ -305,113 +308,112 @@ body <- dashboardBody(
             box(
               width = 10,
               title = "Arguments", status = "info", solidHeader = TRUE,
-              "Description:", br(), "snp.cnv.data(snp, min.chr.probe = 100, verbose = FALSE)",
+              "Description:", br(), "All analysis steps are integrate into a pipeline. The results, including visualization plots are placed
+in a directory as specified by user.",
               fileInput(
                 "snp.cnv", 
-                "A data frame containing three columns: chr, position and GC.",
+                "snp.cnv, a data frame constructed from a text file with LRR and BAF information.",
                 multiple = FALSE, accept = NULL, width = NULL,
                 buttonLabel = "Browse...", 
                 placeholder = "No file selected"),
-              textInput("output.dir_for_snp_cnv",
-                        "the directory to save all the results",
-                        "test_saasCNV"
-              ),
               textInput("sample.id_for_snp_cnv",
-                        "sample ID to be displayed in the data frame of the results and the title of some diagnosis plots",
+                        "sample.id, sample ID to be displayed in the data frame of the results and the title of some diagnosis plots",
                         "WES_0116"
               ),
               checkboxInput("do.GC.adjust_for_snp_cnv",
-                            "carry out GC content adjustment on log2ratio",
+                            "do.GC.adjust, carry out GC content adjustment on log2ratio",
                             FALSE
               ),
               sliderInput("min.chr.probe_for_snp_cnv",
-                          "the minimum number of probes tagging a chromosome for it to be passed to the subsequent analysis",
+                          "min.chr.probe, the minimum number of probes tagging a chromosome for it to be passed to the subsequent analysis",
                           50, 200, 100
               ),
               sliderInput("min.snps_for_snp_cnv",
-                          "the minimum number of probes a segment needs to span",
+                          "min.snps, the minimum number of probes a segment needs to span",
                           1, 20, 10
               ),
               sliderInput("joint.segmentation.pvalue.cutoff_for_snp_cnv",
-                          "the p-value cut-off one (or a pair) of change points to be determined as signifi- cant in each cycle of joint segmentation",
+                          "joint.segmentation.pvalue.cutoff, the p-value cut-off one (or a pair) of change points to be determined as signifi- cant in each cycle of joint segmentation",
                           0, 1e-3, 1e-04
               ),
               sliderInput("max.chpts_for_snp_cnv",
-                          "the maximum number of change points to be detected for each chromosome",
+                          "max.chpts, the maximum number of change points to be detected for each chromosome",
                           1, 60, 30
               ),
               checkboxInput("do.merge_for_snp_cnv",
-                            "carry out segments merging step",
+                            "do.merge, carry out segments merging step",
                             TRUE
               ),
               checkboxInput("use.null.data_for_snp_cnv",
-                            "use only data for probes located in normal copy segments for bootstrapping",
+                            "use.null.data, use only data for probes located in normal copy segments for bootstrapping",
                             TRUE
               ),
               sliderInput("num.perm_for_snp_cnv",
-                          "the number of replicates drawn by bootstrap",
+                          "num.perm, the number of replicates drawn by bootstrap",
                           10, 2000, 1000
               ),
               sliderInput("maxL_for_snp_cnv",
-                          "the maximum length in terms of number of probes a bootstrapped segment may span, could only be integer or NULL",
+                          "maxL, the maximum length in terms of number of probes a bootstrapped segment may span, could only be integer or NULL",
                           1000, 4000, 2000
               ),
               sliderInput("merge.pvalue.cutoff_for_snp_cnv",
-                          "a p-value cut-off for merging",
+                          "merge.pvalue.cutoff, a p-value cut-off for merging",
                           0, 0.1, 0.05
               ),
               checkboxInput("do.cnvcall.on.merge_for_snp_cnv",
-                            "call CNV to be done after merging step",
+                            "do.cnvcall.on.merge, call CNV to be done after merging step",
                             TRUE
               ),
               sliderInput("cnvcall.pvalue.cutoff_for_snp_cnv",
-                          "a p-value cut-off for CNV calling",
+                          "cnvcall.pvalue.cutoff, a p-value cut-off for CNV calling",
                           0, 0.1, 0.05
               ),
               checkboxInput("do.boundary.refine_for_snp_cnv",
-                            "refine the segment boundaries based on the grid of heterozygous probes by all probes with LRR data",
+                            "do.boundary.refine, refine the segment boundaries based on the grid of heterozygous probes by all probes with LRR data",
                             FALSE
               ),
               checkboxInput("do.plot_for_snp_cnv",
-                            "output diagnosis plots",
+                            "do.plot, output diagnosis plots",
                             TRUE
               ),
               sliderInput("cex_for_snp_cnv",
-                          "plotting text and symbols magnified ratio",
+                          "cex, plotting text and symbols magnified ratio",
                           0, 0.2, 0.1
               ),
               sliderInput("ref.num.probe_for_snp_cnv",
-                          "the reference number of probes against which a segment is compared in order to determine the cex of the segment to be displayed",
+                          "ref.num.probe, the reference number of probes against which a segment is compared in order to determine the cex of the segment to be displayed",
                           100, 2000, 1000
               ),
               checkboxInput("do.gene.anno_for_snp_cnv",
-                            "perform gene annotation step",
+                            "do.gene.anno, perform gene annotation step",
                             FALSE
               ),
               fileInput(
                 "gene.anno", 
-                "A data frame containing three columns: chr, position and GC.",
+                "gene.anno, a tab-delimited file containing gene annotation information",
                 multiple = FALSE, accept = NULL, width = NULL,
                 buttonLabel = "Browse...", 
                 placeholder = "No file selected"),
               sliderInput("seed_for_snp_cnv",
-                          "random seed can be set for reproducibility of results, could only be integer",
+                          "seed, random seed can be set for reproducibility of results, could only be integer",
                           100000000, 999999999, 123456789
               ),
               checkboxInput("verbose_for_snp_cnv",
-                            "output more information",
+                            "verbose, output more information",
                             TRUE
-              )
+              ),
+              downloadButton("downloadData_for_snp", label = "Download")
             )
     ),
     tabItem(tabName = 'snp_cnv_data_f',
             box(
               width = 10,
               title = "Arguments", status = "info", solidHeader = TRUE,
-              "Description:", br(), "snp.cnv.data(snp, min.chr.probe = 100, verbose = FALSE)",
+              "Description:", br(), "Transform LRR and BAF information into log2ratio and log2mBAF that we use for joint segmentation
+and CNV calling.",
               fileInput(
                 "snp", 
-                "A data frame containing three columns: chr, position and GC.",
+                "snp, a data frame with LRR and BAF information from SNP array",
                 multiple = FALSE, accept = NULL, width = NULL,
                 buttonLabel = "Browse...", 
                 placeholder = "No file selected"),
@@ -419,10 +421,11 @@ body <- dashboardBody(
                             "only.CNV: ",
                             TRUE),
               sliderInput("min.chr.probe_for_snp_cnv_data",
-                           "min.chr.probe:",
+                           "min.chr.probe, the minimum number of probes tagging a chromosome for it to be passed to the
+subsequent analysis:",
                            50, 200, 100),
               checkboxInput("verbose_for_snp_cnv_data", 
-                            "verbose: ",
+                            "verbose, logical:",
                             TRUE)
             )
     ),
@@ -430,15 +433,16 @@ body <- dashboardBody(
             box(
               width = 10,
               title = "Arguments", status = "info", solidHeader = TRUE,
-              "Description:", br(), "snp.refine.boundary(data, segs.stat)",
+              "Description:", br(), "Refine the segment boundaries based on the grid of heterozygous probes by all probes with LRR
+data.",
               fileInput(
                 "data", 
-                "data",
+                "data, a data frame containing log2ratio and log2mBAF data generated by snp.cnv.data",
                 multiple = FALSE, accept = NULL, width = NULL,
                 buttonLabel = "Browse...", 
                 placeholder = "No file selected"),
               textInput("segs.stat",
-                        "a data frame containing segment locations and summary statistics resulting from cnv.call.",
+                        "segs.stat, a data frame containing segment locations and summary statistics resulting from cnv.call.",
                         "cnv.call")
             )
     ),
@@ -446,21 +450,21 @@ body <- dashboardBody(
             box(
               width = 10,
               title = "Arguments", status = "info", solidHeader = TRUE,
-              "Description:", br(), "vcf2txt(vcf.file, normal.col = 10, tumor.col = 11, MQ.cutoff = 30)",
+              "Description:", br(), "It parses a VCF file and extract necessary information for CNV analysis.",
               fileInput(
                 "vcf2", 
-                "wes",
+                "vcf2, vcf file name.",
                 multiple = FALSE, accept = NULL, width = NULL,
                 buttonLabel = "Browse...", 
                 placeholder = "No file selected"),
               sliderInput("normal_for_vcf2txt",
-                          "the number of the column in which the genotype and read depth information of normal tissue are located in the vcf file.",
+                          "normal, the number of the column in which the genotype and read depth information of normal tissue are located in the vcf file.",
                            1, 20, 9),
               sliderInput("tumor_for_vcf2txt",
-                           "the number of the column in which the genotype and read depth information of tumor tissue are located in the vcf file.",
+                           "tumor, the number of the column in which the genotype and read depth information of tumor tissue are located in the vcf file.",
                            1, 20, 9),
               sliderInput("MQ_for_vcf2txt",
-                           "the minimum criterion of mapping quality.",
+                           "MQ, the minimum criterion of mapping quality.",
                            1, 60, 30)
             )
     )
