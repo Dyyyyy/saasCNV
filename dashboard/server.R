@@ -18,8 +18,73 @@ data(seq.segs)
 data(snp.cnv)
 data(snp.cnv.refine)
 
-shinyServer(function(input, output) {
-
+shinyServer(function(input, output, session) {
+  output$txt <- renderText({
+    files <- paste(input$files, collapse = ", ")
+    paste("You chose", files)
+  })
+  volumes <- c('Home'=getwd())
+  shinyFileChoose(input, 'file', roots=volumes, session=session, restrictions=system.file(package='base'))
+  shinyDirChoose(input, 'directory', roots=volumes, session=session, restrictions=system.file(package='base'))
+  output$filepaths <- renderTable(
+    {
+      # output$plot <- renderPlot({}, width = "0")
+      # output$tbl <- DT::renderDataTable({})
+      
+      filepath = as.character(parseFilePaths(volumes, input$file)[[4]])
+      
+      if (is.null(input$file))
+        return(NULL)
+      df <- read.csv(filepath)
+      download_file_from_server()
+      return(df)
+    }
+  )
+  output$folderpaths <- renderPrint({
+    if(is.character(as.character(getFolderpathFunc())) && length(as.character(getFolderpathFunc())) == 0)
+      return(NULL)
+    upload_file_to_server()
+  }
+  )
+  
+  observeEvent(input$delete_file_from_server, {
+    if(is.character(as.character(getFolderpathFunc())) 
+       && length(as.character(getFolderpathFunc())) == 0
+       && is.character(as.character(getFilepathFunc())) 
+       && length(as.character(getFilepathFunc())) == 0)
+      return(NULL)
+    print(paste((as.character(getFilepathFunc()))))
+    file.remove(paste((as.character(getFilepathFunc()))))
+    # unlink(paste((as.character(getFilepathFunc())), recursive = TRUE, force = FALSE))
+    print('bye')
+  })
+  
+  getFilepathFunc <- function() {
+    filepath = as.character(parseFilePaths(volumes, input$file)[[4]])
+    return(filepath)
+  }
+  
+  getFolderpathFunc <- function() {
+    folderpath = as.character(parseDirPath(volumes, input$directory))
+    return(folderpath)
+  }
+  
+  
+  output$userpanel <- renderUI({
+    # session$user is non-NULL only in authenticated sessions
+    if (!is.null(session$user)) {
+      sidebarUserPanel(
+        span("Logged in as ", session$user),
+        subtitle = a(icon("sign-out"), "Logout", href="__logout__"))
+    } else {
+      sidebarUserPanel(
+        span("Logged in as ", session$user),
+        subtitle = a(icon("sign-out"), "Logout", href="__logout__"))
+    }
+  })
+  
+  
+  
   observeEvent(input$tabs, {
     tabId <- reactive({
       input$tabs
@@ -28,6 +93,7 @@ shinyServer(function(input, output) {
     output$tbl <- DT::renderDataTable({})
     
     switch(tabId(),
+           'lena_chen' = lena_chen_f(),
            'cnv_call_f' = cnv_call_f(),
            'cnv_data_f' = cnv_data_f(),
            'diagnosis_cluster_plot_f' = diagnosis_cluster_plot_f(),
@@ -43,31 +109,82 @@ shinyServer(function(input, output) {
            'snp_refine_boundary_f' = snp_refine_boundary_f(),
            'vcf2txt_f' = vcf2txt_f()
     )
+    
+    
   })
   
+  lena_chen_f <- function(){
+    output$tree <- renderTree({
+      list(
+        root1 = "",
+        root2 = list(
+          SubListA = list(leaf1 = "1", leaf2 = "", leaf3=""),
+          SubListB = list(leafA = "", leafB = "")
+        )
+      )
+    })
+  }
+  
+  download_file_from_server <- function(){
+    if(is.character(as.character(getFilepathFunc())) && length(as.character(getFilepathFunc())) == 0)
+      return(NULL)
+    length = lengths(strsplit(getFilepathFunc(),'/'))
+    output$download_from_file_system <- downloadHandler(
+      # length = lengths(strsplit(getFilepathFunc(),'/')),
+      filename = as.character(strsplit(getFilepathFunc(), '/')[[1]][length]),
+      content = function(file) {
+        file.copy(getFilepathFunc(), file)
+      }
+    )
+  }
+  
+  upload_file_to_server <- function(){
+    if(is.character(as.character(getFolderpathFunc())) && length(as.character(getFolderpathFunc())) == 0)
+      return(NULL)
+    upload_file <- input$upload_file_to_server
+    if (is.null(upload_file))
+      return(NULL)
+    file.copy(upload_file$datapath, paste((as.character(getFolderpathFunc())), upload_file$name, sep = '/'))
+  }
+  
   cnv_call_f <- function(){
+    data <- cnv.call(data=seq.data, 
+                     sample.id=input$sampleId,
+                     segs.stat=seq.segs.merge, 
+                     maxL=input$sampleId, 
+                     N=input$N,
+                     pvalue.cutoff=input$pvalue)
     output$tbl <- DT::renderDataTable({
-      cnv.call(data=seq.data, 
-               sample.id=input$sampleId,
-               segs.stat=seq.segs.merge, 
-               maxL=input$sampleId, 
-               N=input$N,
-               pvalue.cutoff=input$pvalue)})
+      data
+    })
+    output$down_test <- downloadHandler(
+      filename = function() { paste(as.character(input$tabs), '.csv', sep='') },
+      content = function(file) {
+        write.csv(data, file)
+      }
+    )
   }
   
   cnv_data_f <- function(){
     output$tbl <- DT::renderDataTable({
-    vcf_file <- input$vcf
-    if (is.null(vcf_file))
-      return(NULL)
-    vcf_table <- read.delim(vcf_file$datapath, as.is=TRUE)
-    print(vcf_file$datapath)
-    cnv.data(vcf = vcf_table,
-             min.chr.probe = input$min.chr.probe,
-             verbose = input$verbose)
-    
+      vcf_file <- input$vcf
+      if (is.null(vcf_file))
+        return(NULL)
+      vcf_table <- read.delim(vcf_file$datapath, as.is=TRUE)
+      print(vcf_file$datapath)
+      cnv.data(vcf = vcf_table,
+               min.chr.probe = input$min.chr.probe,
+               verbose = input$verbose)
+      
       data(seq.data)
+      output$down_test <- downloadHandler(
+        filename = function() { paste(as.character(input$tabs), '.csv', sep='') },
+        content = function(file) {
+          write.csv(head(seq.data), file)
+        }
+      )
       head(seq.data)
+      
     })
   }
   
@@ -78,40 +195,76 @@ shinyServer(function(input, output) {
                              min.snps=input$min.snps,
                              max.cex=input$max.cex,
                              ref.num.probe=input$ref.num.probe)})
+    # filename = function() { paste('diagnosis_cluster_plot', '.png', sep='') }
+    # file.copy(output$plot,file.path(getwd(),"hi"))
+    output$down_test <- downloadHandler(
+      filename =  function() {
+        paste(as.character(input$tabs), "png", sep=".")
+      },
+      # content is a function with argument file. content writes the plot to the device
+      content = function(file) {
+        png(file)
+        diagnosis.cluster.plot(segs=seq.cnv,
+                               chrs=sub("^chr","",unique(seq.cnv$chr)),
+                               min.snps=input$min.snps,
+                               max.cex=input$max.cex,
+                               ref.num.probe=input$ref.num.probe)
+        dev.off()  # turn the device off
+      } 
+    )
+    
   }
   
   diagnosis_seg_plot_chr_f <- function(){
+    datasetInput <- reactive({
+      switch(input$sample.id,
+             "Joint Segmentation" = seq.segs,
+             "After Segments Merging Step" = seq.segs.merge)
+    })
     output$plot <- renderPlot({
-        datasetInput <- reactive({
-          switch(input$sample.id,
-                 "Joint Segmentation" = seq.segs,
-                 "After Segments Merging Step" = seq.segs.merge)
-        })
+      
+      diagnosis.seg.plot.chr(data=seq.data, segs=datasetInput(),
+                             sample.id=input$sample.id,
+                             chr=input$chr, cex=input$cex)
+    })
+    output$down_test <- downloadHandler(
+      filename =  function() {
+        paste(as.character(input$tabs), "png", sep=".")
+      },
+      # content is a function with argument file. content writes the plot to the device
+      content = function(file) {
+        png(file)
         diagnosis.seg.plot.chr(data=seq.data, segs=datasetInput(),
                                sample.id=input$sample.id,
                                chr=input$chr, cex=input$cex)
-      })
+        dev.off()  # turn the device off
+      } 
+    )
   }
   
   GC_adjust_f <- function(){
     output$tbl <- DT::renderDataTable({
-    data <- reactive({
-      dist <- switch(input$dist,
-                      cnv = cnv,
-                      snp = snp,
-                      cnv)
-        
-      dist(input$n)
-    })
-        
-    gc_file <- input$gc
-    if (is.null(gc_file))
-      return(NULL)
-    gc <- read.delim(file=gc_file$datapath, as.is=TRUE)
-    head(gc)
-    seq.data <- GC.adjust(data = seq.data, gc = gc, maxNumDataPoints = input$maxNumDataPoints)
-
-    
+      data <- reactive({
+        dist <- switch(input$dist,
+                       cnv = cnv,
+                       snp = snp,
+                       cnv)
+        dist(input$n)
+      })
+      
+      gc_file <- input$gc
+      if (is.null(gc_file))
+        return(NULL)
+      gc <- read.delim(file=gc_file$datapath, as.is=TRUE)
+      head(gc)
+      seq.data <- GC.adjust(data = seq.data, gc = gc, maxNumDataPoints = input$maxNumDataPoints)
+      output$down_test <- downloadHandler(
+        filename = function() { paste(as.character(input$tabs), '.csv', sep='') },
+        content = function(file) {
+          write.csv(head(seq.data), file)
+        }
+      )
+      
       head(seq.data)
     })
   }
@@ -123,18 +276,38 @@ shinyServer(function(input, output) {
                        chrs=sub("^chr","",unique(seq.cnv$chr)),
                        cex=input$cex_for_genome_wide_plot)
     })
+    output$down_test <- downloadHandler(
+      filename =  function() {
+        paste(as.character(input$tabs), "png", sep=".")
+      },
+      # content is a function with argument file. content writes the plot to the device
+      content = function(file) {
+        png(file)
+        genome.wide.plot(data=seq.data, segs=seq.cnv,
+                         sample.id=input$sampleId_for_genome_wide_plot,
+                         chrs=sub("^chr","",unique(seq.cnv$chr)),
+                         cex=input$cex_for_genome_wide_plot)
+        dev.off()  # turn the device off
+      } 
+    )
   }
   
   joint_segmentation_f <- function(){
     seq.segs <- joint.segmentation(data=seq.data,
-                       min.snps=input$min.snps,
-                       global.pval.cutoff=input$global.pval.cutoff,
-                       max.chpts=input$max.chpts,
-                       verbose=input$verbose_for_join_segementation)
+                                   min.snps=input$min.snps,
+                                   global.pval.cutoff=input$global.pval.cutoff,
+                                   max.chpts=input$max.chpts,
+                                   verbose=input$verbose_for_join_segementation)
     data(seq.segs)
     output$tbl <- DT::renderDataTable({
       head(seq.segs)
     })
+    output$down_test <- downloadHandler(
+      filename = function() { paste(as.character(input$tabs), '.csv', sep='') },
+      content = function(file) {
+        write.csv(head(seq.segs), file)
+      }
+    )
   }
   
   merging_segments_f <- function(){
@@ -149,6 +322,12 @@ shinyServer(function(input, output) {
     output$tbl <- DT::renderDataTable({
       head(seq.segs.merge)
     })
+    output$down_test <- downloadHandler(
+      filename = function() { paste(as.character(input$tabs), '.csv', sep='') },
+      content = function(file) {
+        write.csv(head(seq.segs.merge), file)
+      }
+    )
   }
   
   NGS_CNV_f <- function(){
@@ -205,12 +384,13 @@ shinyServer(function(input, output) {
   
   reannotate_CNV_res_f <- function(){
     output$tbl <- DT::renderDataTable({
-    file <- input$refGene
-    if (is.null(file))
-      return(NULL)
-    gene.anno <- read.delim(file=file$datapath, as.is=TRUE, comment.char="")
-    data(seq.cnv)
-    
+      file <- input$refGene
+      if (is.null(file))
+        return(NULL)
+      gene.anno <- read.delim(file=file$datapath, as.is=TRUE, comment.char="")
+      data(seq.cnv)
+      
+      
       reannotate.CNV.res(res=seq.cnv, gene=gene.anno, only.CNV=input$only.CNV)
     })
   }
@@ -272,7 +452,14 @@ shinyServer(function(input, output) {
       if (is.null(snp_file))
         return(NULL)
       snp_table <- read.delim(file=snp_file$datapath, as.is=TRUE)
-      head(snp.cnv.data(snp=snp_table, min.chr.probe=input$min.chr.probe_for_snp_cnv_data, verbose=input$verbose_for_snp_cnv_data))
+      data <- snp.cnv.data(snp=snp_table, min.chr.probe=input$min.chr.probe_for_snp_cnv_data, verbose=input$verbose_for_snp_cnv_data)
+      output$down_test <- downloadHandler(
+        filename = function() { paste(as.character(input$tabs), '.csv', sep='') },
+        content = function(file) {
+          write.csv(head(data), file)
+        }
+      )
+      head(data)
     })
   }
   
@@ -281,8 +468,14 @@ shinyServer(function(input, output) {
       data_file <- input$data
       if (is.null(data_file))
         return(NULL)
-    load(data_file$datapath)
-    snp.cnv.refine <- snp.refine.boundary(data=snp.data, segs.stat=snp.cnv)
+      load(data_file$datapath)
+      snp.cnv.refine <- snp.refine.boundary(data=snp.data, segs.stat=snp.cnv)
+      output$down_test <- downloadHandler(
+        filename = function() { paste(as.character(input$tabs), '.csv', sep='') },
+        content = function(file) {
+          write.csv(head(snp.cnv.refine), file)
+        }
+      )
       head(snp.cnv.refine)
     })
   }

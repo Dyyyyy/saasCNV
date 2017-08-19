@@ -1,34 +1,82 @@
 library(shiny)
 library(shinydashboard)
 library(DT)
+library(shinyFiles)
+library(shinyTree)
 
-header <- dashboardHeader(title = "saasCNV")
+header <- dashboardHeader(title = "saasCNV",
+                          dropdownMenu(type = "tasks", badgeStatus = "success",
+                                       taskItem(value = 90, color = "green","Task1"),
+                                       taskItem(value = 17, color = "aqua","Task2"),
+                                       taskItem(value = 75, color = "yellow","Task3"),
+                                       taskItem(value = 80, color = "red","Task4"),
+                                       taskItem(value = 98, color = "blue","Task5")
+                          ))
 
 sidebar <- dashboardSidebar(
+  # tags$head(tags$style(HTML('.shiny-server-account { display: none; }'))),
+  # uiOutput("userpanel"),
   sidebarSearchForm(textId = "searchText", buttonId = "searchButton",
                     label = "Search..."),
   sidebarMenu(
     id = "tabs", 
-    menuItem("diagnosis_cluster_plot", tabName = 'diagnosis_cluster_plot_f', icon = icon("dashboard")),
-    menuItem("cnv_call", tabName = 'cnv_call_f', icon = icon("dashboard")),
-    menuItem("cnv_data", tabName = 'cnv_data_f', icon = icon("dashboard")),
-    
-    menuItem("diagnosis_cluster_plot_chr", tabName = 'diagnosis_seg_plot_chr_f', icon = icon("dashboard")),
-    menuItem("GC_adjust", tabName = 'GC_adjust_f', icon = icon("dashboard")),
-    menuItem("genome_wide_plot", tabName = 'genome_wide_plot_f', icon = icon("dashboard")),
-    menuItem("joint_segmentation", tabName = 'joint_segmentation_f', icon = icon("dashboard")),
-    menuItem("merging_segmentation", tabName = 'merging_segments_f', icon = icon("dashboard")),
+    menuItem("file_system", tabName = 'file_system_f', icon = icon("dashboard")),
+    # menuItem("lena_chen", tabName = 'lena_chen', icon = icon("dashboard")),
     menuItem("NGS_CNV", tabName = 'NGS_CNV_f', icon = icon("dashboard")),
-    menuItem("reannotate_CNV_res", tabName = 'reannotate_CNV_res_f', icon = icon("dashboard")),
-    menuItem("snp_cnv", tabName = 'snp_cnv_f', icon = icon("dashboard")),
-    menuItem("snp_cnv_data", tabName = 'snp_cnv_data_f', icon = icon("dashboard")),
-    menuItem("snp_refine_boundary", tabName = 'snp_refine_boundary_f', icon = icon("dashboard")),
-    menuItem("vcf2txt", tabName = 'vcf2txt_f', icon = icon("dashboard"))
+    menuItem("advance_user", tabName = 'advance_user', icon = icon("dashboard"),
+             menuItem("diagnosis_cluster_plot", tabName = 'diagnosis_cluster_plot_f', icon = icon("dashboard")),
+             menuItem("cnv_call", tabName = 'cnv_call_f', icon = icon("dashboard")),
+             menuItem("cnv_data", tabName = 'cnv_data_f', icon = icon("dashboard")),
+             menuItem("diagnosis_seg_plot_chr_f", tabName = 'diagnosis_seg_plot_chr_f', icon = icon("dashboard")),
+             menuItem("GC_adjust", tabName = 'GC_adjust_f', icon = icon("dashboard")),
+             menuItem("genome_wide_plot", tabName = 'genome_wide_plot_f', icon = icon("dashboard")),
+             menuItem("joint_segmentation", tabName = 'joint_segmentation_f', icon = icon("dashboard")),
+             menuItem("merging_segmentation", tabName = 'merging_segments_f', icon = icon("dashboard")),
+             menuItem("reannotate_CNV_res", tabName = 'reannotate_CNV_res_f', icon = icon("dashboard")),
+             menuItem("snp_cnv", tabName = 'snp_cnv_f', icon = icon("dashboard")),
+             menuItem("snp_cnv_data", tabName = 'snp_cnv_data_f', icon = icon("dashboard")),
+             menuItem("snp_refine_boundary", tabName = 'snp_refine_boundary_f', icon = icon("dashboard")),
+             menuItem("vcf2txt", tabName = 'vcf2txt_f', icon = icon("dashboard"))
+    )
   )
 )
 
 body <- dashboardBody(
   tabItems(
+    tabItem(tabName = 'file_system_f',
+            box(
+              title = "Inputs", status = "warning", solidHeader = TRUE,
+              
+              shinyFilesButton('file', 'Select File', 'Please select a file', FALSE, buttonType = "primary"),
+              shinyDirButton('directory', 'Folder select', 'Please select a folder'),
+              
+              downloadButton("download_from_file_system", label = "Download"),
+              fileInput(
+                "upload_file_to_server", 
+                "",
+                multiple = TRUE, accept = NULL, width = NULL,
+                buttonLabel = "Browse...", 
+                placeholder = "No file selected"),
+              actionButton("delete_file_from_server", "Delete!")
+            ),
+            
+            box(
+              # width = 8,
+              # height = 200,
+              title = "File System", status = "info", solidHeader = TRUE,
+              tableOutput('filepaths')
+            )
+            
+            
+    ),
+    tabItem(tabName = 'lena_chen',
+            box(
+              width = 10,
+              title = "Arguments", status = "info", solidHeader = TRUE,
+              "Description:", br(), "Assign SCNA state to each segment directly from joint segmentation or from the results after seg- ments merging step.",
+              shinyTree("tree")
+            )
+    ),
     tabItem(tabName = 'cnv_call_f',
             box(
               width = 10,
@@ -45,7 +93,7 @@ body <- dashboardBody(
                           500, 2000, 1000),
               sliderInput("pvalue",
                           "pvalue, a p-value cut-off for CNV calling",
-                           0, 0.10, 0.05)
+                          0, 0.10, 0.05)
             )
     ),
     tabItem(tabName = 'cnv_data_f',
@@ -62,7 +110,7 @@ body <- dashboardBody(
               sliderInput(
                 "min.chr.probe",
                 "min.chr.probe, the minimum number of probes tagging a chromosome for it to be passed to the
-                 subsequent analysis",
+                subsequent analysis",
                 50, 200, 100
               ),
               checkboxInput(
@@ -71,7 +119,7 @@ body <- dashboardBody(
                 FALSE
               )
             )
-    ),
+            ),
     tabItem(tabName = 'diagnosis_cluster_plot_f',
             box(
               width = 10,
@@ -85,11 +133,11 @@ body <- dashboardBody(
                           1, 100, 3),
               sliderInput("ref.num.probe",
                           "ref.num.probe, The reference number of probes against which a segment is compared
-in order to determine the cex of the segment to be displayed. Default is NULL. If
-NULL, It will be automatically specified as 1/100 of the number of data points.",
+                          in order to determine the cex of the segment to be displayed. Default is NULL. If
+                          NULL, It will be automatically specified as 1/100 of the number of data points.",
                           800, 2000, 1000)
             )
-    ),
+            ),
     tabItem(tabName = 'diagnosis_seg_plot_chr_f',
             box(
               width = 10,
@@ -97,16 +145,17 @@ NULL, It will be automatically specified as 1/100 of the number of data points."
               "Description:", br(), "diagnosis.seg.plot.chr(data, segs, sample.id = 'Sample', chr = 1, cex = 0.3)",
               selectInput("sample.id", "Choose a data frame:", 
                           choices = c("Joint Segmentation", "After Segments Merging Step")),
-              sliderInput("chr",
-                          "chr, the chromosome number (e.g. 1) to be visualized",
-                          0, 2.0, 1.0),
+              selectInput("chr", "Choose a chr: ",
+                          choices = c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12",
+                                      "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "X", "Y"
+                          )),
               sliderInput("cex",
                           "cex, a numerical value giving the amount by which plotting text and symbols should
-be magnified relative to the default. It can be adjusted in order to make the plot
+                          be magnified relative to the default. It can be adjusted in order to make the plot
                           legible.",
                           0, 1, 0.3)
             )
-    ),
+            ),
     tabItem(tabName = 'GC_adjust_f',
             box(
               width = 10,
@@ -122,8 +171,8 @@ be magnified relative to the default. It can be adjusted in order to make the pl
                 buttonLabel = "Browse...", 
                 placeholder = "No file selected"),
               sliderInput("maxNumDataPoints",
-                           "The maximum number of data points used for loess fit. Default is 10000.",
-                           5000, 15000, 10000)
+                          "The maximum number of data points used for loess fit. Default is 10000.",
+                          5000, 15000, 10000)
             )
     ),
     tabItem(tabName = 'genome_wide_plot_f',
@@ -154,7 +203,7 @@ be magnified relative to the default. It can be adjusted in order to make the pl
                           0, 20, 10),
               sliderInput("global.pval.cutoff",
                           "global.pval.cutoff, the p-value cut-off a (or a pair) of change points to be determined as significant
-in each cycle of joint segmentation",
+                          in each cycle of joint segmentation",
                           0, 1e-3, 1e-4),
               sliderInput("max.chpts",
                           "max.chpts, the maximum number of change points to be detected for each chromosome",
@@ -165,7 +214,7 @@ in each cycle of joint segmentation",
                 TRUE
               )
             )
-    ),
+            ),
     tabItem(tabName = 'merging_segments_f',
             box(
               width = 10,
@@ -175,14 +224,14 @@ in each cycle of joint segmentation",
                             "use.null.data, logical: ",
                             TRUE),
               sliderInput("N_for_merging_segments",
-                           "N, the number of replicates drawn by bootstrap:",
-                           500, 2000, 1000),
+                          "N, the number of replicates drawn by bootstrap:",
+                          500, 2000, 1000),
               sliderInput("maxL_for_mering_segments",
-                           "maxL, integer:",
-                           1000, 4000, 2000),
+                          "maxL, integer:",
+                          1000, 4000, 2000),
               sliderInput("merge_pvalue_cutoff_for_mering_segments",
                           "merge.pvalue.cutoff, a p-value cut-off for merging:",
-                           0, 0.1, 0.05),
+                          0, 0.1, 0.05),
               checkboxInput("baseline_for_merging_segments",
                             "do.manual.baseline, logical:",
                             FALSE),
@@ -192,11 +241,19 @@ in each cycle of joint segmentation",
             )
     ),
     tabItem(tabName = 'NGS_CNV_f',
+            checkboxGroupInput("files", "Choose files you want to process:",
+                               choiceNames =
+                                 dir('/Users/cz/Downloads/saasCNV-master/dashboard/project2'),
+                               choiceValues =
+                                 dir('/Users/cz/Downloads/saasCNV-master/dashboard/project2')
+            ),
+            textOutput("txt"),
             box(
               width = 10,
               title = "Arguments", status = "info", solidHeader = TRUE,
               "Description:", br(), "All analysis steps are integrate into a pipeline. The results, including visualization plots are placed
-in a directory as specified by user.",
+              in a directory as specified by user.",
+              
               fileInput(
                 "vcf_ngs", 
                 "vcf_ngs, the location of tab-delimit file with GC content (averaged per 1kb window) information",
@@ -240,8 +297,8 @@ in a directory as specified by user.",
                           500, 2000, 1000
               ),
               sliderInput("maxL_for_ngs_cnv",
-                           "maxL, the maximum length in terms of number of probes a bootstrapped segment may span, could only be integer or NULL",
-                           1000, 3000, 2000
+                          "maxL, the maximum length in terms of number of probes a bootstrapped segment may span, could only be integer or NULL",
+                          1000, 3000, 2000
               ),
               sliderInput("merge.pvalue.cutoff_for_ngs_cnv",
                           "merge.pvalue.cutoff, a p-value cut-off for merging",
@@ -309,7 +366,7 @@ in a directory as specified by user.",
               width = 10,
               title = "Arguments", status = "info", solidHeader = TRUE,
               "Description:", br(), "All analysis steps are integrate into a pipeline. The results, including visualization plots are placed
-in a directory as specified by user.",
+              in a directory as specified by user.",
               fileInput(
                 "snp.cnv", 
                 "snp.cnv, a data frame constructed from a text file with LRR and BAF information.",
@@ -404,13 +461,13 @@ in a directory as specified by user.",
               ),
               downloadButton("downloadData_for_snp", label = "Download")
             )
-    ),
+            ),
     tabItem(tabName = 'snp_cnv_data_f',
             box(
               width = 10,
               title = "Arguments", status = "info", solidHeader = TRUE,
               "Description:", br(), "Transform LRR and BAF information into log2ratio and log2mBAF that we use for joint segmentation
-and CNV calling.",
+              and CNV calling.",
               fileInput(
                 "snp", 
                 "snp, a data frame with LRR and BAF information from SNP array",
@@ -421,9 +478,9 @@ and CNV calling.",
                             "only.CNV: ",
                             TRUE),
               sliderInput("min.chr.probe_for_snp_cnv_data",
-                           "min.chr.probe, the minimum number of probes tagging a chromosome for it to be passed to the
-subsequent analysis:",
-                           50, 200, 100),
+                          "min.chr.probe, the minimum number of probes tagging a chromosome for it to be passed to the
+                          subsequent analysis:",
+                          50, 200, 100),
               checkboxInput("verbose_for_snp_cnv_data", 
                             "verbose, logical:",
                             TRUE)
@@ -434,7 +491,7 @@ subsequent analysis:",
               width = 10,
               title = "Arguments", status = "info", solidHeader = TRUE,
               "Description:", br(), "Refine the segment boundaries based on the grid of heterozygous probes by all probes with LRR
-data.",
+              data.",
               fileInput(
                 "data", 
                 "data, a data frame containing log2ratio and log2mBAF data generated by snp.cnv.data",
@@ -459,22 +516,21 @@ data.",
                 placeholder = "No file selected"),
               sliderInput("normal_for_vcf2txt",
                           "normal, the number of the column in which the genotype and read depth information of normal tissue are located in the vcf file.",
-                           1, 20, 9),
+                          1, 20, 9),
               sliderInput("tumor_for_vcf2txt",
-                           "tumor, the number of the column in which the genotype and read depth information of tumor tissue are located in the vcf file.",
-                           1, 20, 9),
+                          "tumor, the number of the column in which the genotype and read depth information of tumor tissue are located in the vcf file.",
+                          1, 20, 9),
               sliderInput("MQ_for_vcf2txt",
-                           "MQ, the minimum criterion of mapping quality.",
-                           1, 60, 30)
+                          "MQ, the minimum criterion of mapping quality.",
+                          1, 60, 30)
             )
     )
     
-  ),
-
+    ),
+  downloadButton("down_test"),
   plotOutput("plot"),
-  DT::dataTableOutput('tbl', height = 2000)
-  
-)
+  DT::dataTableOutput('tbl', height = 2000),
+  textOutput('folderpaths')
+    )
 
 dashboardPage(header, sidebar, body, skin = "purple")
-  
